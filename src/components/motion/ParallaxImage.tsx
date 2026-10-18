@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { motion, useInView, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import type { SiteImage } from "@/lib/images";
 import { cn } from "@/lib/utils";
@@ -39,33 +39,38 @@ export function ParallaxImage({
   const amount = reduce ? 0 : strength;
   const y = useTransform(scrollYProgress, [0, 1], [`-${amount}%`, `${amount}%`]);
 
+  // Görünürlük maskesiz dış kapsayıcıdan izlenir. Maskeyle tamamen kapatılmış
+  // bir elemanın kesişim alanı sıfır olduğu için, onu doğrudan izlemek bazı
+  // cihazlarda (ör. yüksek piksel yoğunluklu mobil ekranlar) hiç tetiklenmez.
+  const inView = useInView(ref, VIEWPORT);
+  const shown = preload || inView;
   const animateReveal = reveal && !preload && !reduce;
 
   return (
-    <motion.div
-      ref={ref}
-      className={cn("relative overflow-hidden", className)}
-      initial={animateReveal ? { clipPath: "inset(100% 0% 0% 0%)" } : false}
-      whileInView={animateReveal ? { clipPath: "inset(0% 0% 0% 0%)" } : undefined}
-      viewport={VIEWPORT}
-      transition={{ duration: 1.2, ease: EASE_OUT }}
-    >
+    <div ref={ref} className={cn("relative overflow-hidden", className)}>
       <motion.div
-        className="absolute inset-x-0 -inset-y-[10%]"
-        style={{ y }}
-        initial={reduce ? false : { scale: 1.1 }}
-        {...(preload ? { animate: { scale: 1 } } : { whileInView: { scale: 1 }, viewport: VIEWPORT })}
-        transition={{ duration: 1.6, ease: EASE_OUT }}
+        className="absolute inset-0"
+        initial={animateReveal ? { clipPath: "inset(100% 0% 0% 0%)" } : false}
+        animate={animateReveal && shown ? { clipPath: "inset(0% 0% 0% 0%)" } : undefined}
+        transition={{ duration: 1.2, ease: EASE_OUT }}
       >
-        <Image
-          src={image.src}
-          alt={image.alt}
-          fill
-          sizes={sizes}
-          preload={preload}
-          className={cn("object-cover", imageClassName)}
-        />
+        <motion.div
+          className="absolute inset-x-0 -inset-y-[10%]"
+          style={{ y }}
+          initial={reduce ? false : { scale: 1.1 }}
+          animate={shown ? { scale: 1 } : undefined}
+          transition={{ duration: 1.6, ease: EASE_OUT }}
+        >
+          <Image
+            src={image.src}
+            alt={image.alt}
+            fill
+            sizes={sizes}
+            preload={preload}
+            className={cn("object-cover", imageClassName)}
+          />
+        </motion.div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }
