@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <title>Form kaydı</title>
+  </head>
+  <body>
+    <!--
+      Netlify Forms bu dosyayı derleme sırasında tarar.
+      Alan adları, iletişim formunun gönderdiği gövdeyle birebir aynı olmalıdır.
+      Ziyaretçiler bu sayfayı görmez; gönderim /__forms.html adresine yapılır.
+    -->
+    <form name="iletisim" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="iletisim" />
+      <input type="text" name="ad-soyad" />
+      <input type="tel" name="telefon" />
+      <input type="email" name="eposta" />
+      <input type="text" name="konu" />
+      <textarea name="mesaj"></textarea>
+      <input type="text" name="kvkk" />
+      <input type="text" name="bot-field" />
+    </form>
+  </body>
+</html>

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-/** İletişim formu şeması — hem istemcide (react-hook-form) hem Server Action'da kullanılır. */
+/** İletişim formu şeması. Gönderim Netlify Forms üzerinden yapılır. */
 export const contactSchema = z.object({
   name: z
     .string()
@@ -26,7 +26,3 @@ export const contactSchema = z.object({
 });
 
 export type ContactInput = z.infer<typeof contactSchema>;
-
-export type ContactResult =
-  | { ok: true; message: string }
-  | { ok: false; message: string; fieldErrors?: Partial<Record<keyof ContactInput, string>> };

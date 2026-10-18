@@ -1,17 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AnimatePresence, motion } from "motion/react";
-import { AlertCircle, CheckCircle2, ChevronDown, Loader2 } from "lucide-react";
+import { AlertCircle, ChevronDown, Loader2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
-import { submitContact } from "@/app/(site)/iletisim/actions";
 import { Button } from "@/components/ui/Button";
-import { EASE_OUT } from "@/components/motion/easing";
 import { cn } from "@/lib/utils";
-import { contactSchema, type ContactInput, type ContactResult } from "@/lib/validation/contact";
+import { contactSchema, type ContactInput } from "@/lib/validation/contact";
 
 type TopicOption = { value: string; label: string };
 
@@ -28,15 +25,17 @@ function FieldError({ id, message }: { id: string; message?: string }) {
   );
 }
 
+const submitError = "Talebiniz şu anda iletilemedi. Lütfen daha sonra tekrar deneyin veya bizi telefonla arayın.";
+
 export function ContactForm({ topics, defaultTopic = "" }: { topics: TopicOption[]; defaultTopic?: string }) {
-  const [result, setResult] = useState<ContactResult | null>(null);
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const {
     register,
     handleSubmit,
     reset,
-    setError,
     formState: { errors },
   } = useForm<ContactInput>({
     resolver: zodResolver(contactSchema),
@@ -53,17 +52,40 @@ export function ContactForm({ topics, defaultTopic = "" }: { topics: TopicOption
   });
 
   const onSubmit = handleSubmit((values) => {
-    setResult(null);
+    setError(null);
     startTransition(async () => {
-      const response = await submitContact(values);
-      setResult(response);
-      if (response.ok) {
-        reset();
-      } else if (response.fieldErrors) {
-        for (const [key, message] of Object.entries(response.fieldErrors)) {
-          setError(key as keyof ContactInput, { message });
+      const konu = topics.find((topic) => topic.value === values.topic)?.label ?? values.topic;
+      const body = new URLSearchParams({
+        "form-name": "iletisim",
+        "ad-soyad": values.name,
+        telefon: values.phone,
+        eposta: values.email,
+        konu,
+        mesaj: values.message,
+        kvkk: "Evet",
+        "bot-field": values.website ?? "",
+      });
+
+      // Netlify Forms yalnızca yayın ortamında /__forms.html isteğini işler.
+      if (process.env.NODE_ENV !== "development") {
+        try {
+          const response = await fetch("/__forms.html", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: body.toString(),
+          });
+          if (!response.ok) {
+            setError(submitError);
+            return;
+          }
+        } catch {
+          setError(submitError);
+          return;
         }
       }
+
+      reset();
+      router.push("/iletisim/tesekkurler");
     });
   });
 
@@ -206,29 +228,12 @@ export function ContactForm({ topics, defaultTopic = "" }: { topics: TopicOption
       </div>
 
       <div id="form-durum" aria-live="polite">
-        <AnimatePresence>
-          {result && (
-            <motion.div
-              key={result.ok ? "ok" : "err"}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5, ease: EASE_OUT }}
-              className={cn(
-                "flex gap-3 rounded-sm border p-5 text-base",
-                result.ok ? "border-emerald-700/30 bg-emerald-50 text-emerald-900" : "border-red-700/30 bg-red-50 text-red-900",
-              )}
-              role={result.ok ? "status" : "alert"}
-            >
-              {result.ok ? (
-                <CheckCircle2 aria-hidden="true" className="mt-0.5 size-5 shrink-0" />
-              ) : (
-                <AlertCircle aria-hidden="true" className="mt-0.5 size-5 shrink-0" />
-              )}
-              {result.message}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {error && (
+          <div role="alert" className="flex gap-3 rounded-sm border border-red-700/30 bg-red-50 p-5 text-base text-red-900">
+            <AlertCircle aria-hidden="true" className="mt-0.5 size-5 shrink-0" />
+            {error}
+          </div>
+        )}
       </div>
     </form>
   );
