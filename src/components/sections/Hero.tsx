@@ -43,13 +43,15 @@ export function Hero() {
           </p>
         </Reveal>
         <Reveal delay={0.85} y={24}>
-          <div className="mt-10 flex flex-wrap items-center gap-4">
+          {/* Mobilde alt alta, eşit genişlikte ve ortalı: dar ekranlarda tüm genişliği kaplar,
+              genişledikçe en fazla max-w-sm (384px) olur. sm ve üzerinde yan yana, sola hizalı. */}
+          <div className="mx-auto mt-10 flex w-full max-w-sm flex-col gap-4 sm:mx-0 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center">
             <Magnetic>
-              <ButtonLink href="/iletisim" variant="accent" size="lg" arrow>
+              <ButtonLink href="/iletisim" variant="accent" size="lg" arrow className="w-full sm:w-auto">
                 Randevu Talebi
               </ButtonLink>
             </Magnetic>
-            <ButtonLink href="/calisma-alanlari" variant="outlineLight" size="lg">
+            <ButtonLink href="/calisma-alanlari" variant="outlineLight" size="lg" className="w-full sm:w-auto">
               Çalışma Alanlarımız
             </ButtonLink>
           </div>
