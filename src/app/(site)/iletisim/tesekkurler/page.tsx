@@ -77,11 +77,13 @@ export default function ContactThanksPage() {
               Form üzerinden iletilen bilgiler ön değerlendirme içindir; avukatlık sözleşmesi veya
               hukuki danışmanlık yerine geçmez. Acil bir konuda bizi doğrudan arayabilirsiniz.
             </p>
-            <div className="mt-10 flex flex-wrap gap-4">
-              <ButtonLink href="/" arrow>
+            {/* Hero'daki butonlarla aynı davranış: mobilde alt alta, eşit genişlikte ve ortalı
+                (en fazla max-w-sm); sm ve üzerinde yan yana, sola hizalı. */}
+            <div className="mx-auto mt-10 flex w-full max-w-sm flex-col gap-4 sm:mx-0 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center">
+              <ButtonLink href="/" arrow className="w-full sm:w-auto">
                 Ana sayfaya dön
               </ButtonLink>
-              <ButtonLink href="/iletisim" variant="outline">
+              <ButtonLink href="/iletisim" variant="outline" className="w-full sm:w-auto">
                 Yeni talep oluştur
               </ButtonLink>
             </div>
