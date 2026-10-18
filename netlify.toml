@@ -1,7 +1,11 @@
-# Netlify, Next.js'i otomatik algılar ve resmi Next.js adaptörünü (OpenNext) kendisi kurar.
-# Bu dosya yalnızca derleme komutunu ve Node.js sürümünü sabitler.
+# Next.js derlemesini Netlify sunucu çalışma zamanına bağlar.
+# Eklenti sürümü sabitlenmez; Netlify her derlemede güncel OpenNext adaptörünü kurar.
 [build]
   command = "npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 
 [build.environment]
   NODE_VERSION = "22"
